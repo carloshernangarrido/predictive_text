@@ -2,6 +2,7 @@
 import os.path
 
 from ingestion import pdf2textlist, textlist2cleantext
+from tokenization import tokenize
 
 
 def main():
@@ -10,6 +11,7 @@ def main():
     filenames = [os.path.join(path, filename) for filename in filenames]
     text_list = pdf2textlist(filenames)
     clean_text = textlist2cleantext(text_list)
+    tokenize(clean_text, os.path.join(path, 'tokenizer.pkl'))
     print(f'Hi')
 
 
