@@ -6,7 +6,7 @@ from keras.preprocessing.text import Tokenizer
 from keras.utils import to_categorical
 
 
-def tokenize(data: str, tokenizer_filename, ngram_size: int = 3) -> Tuple:
+def tokenize(data: str, tokenizer_filename, ngram_size: int = 1) -> Tuple:
     tokenizer = Tokenizer()
     tokenizer.fit_on_texts([data])
 
