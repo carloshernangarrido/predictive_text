@@ -33,4 +33,4 @@ def tokenize(data: str, tokenizer_filename, ngram_size: int = 1) -> Tuple:
     # y_words = np.array([tokenizer.index_word[y_] for y_ in y_num])
     y = to_categorical(y_num, num_classes=vocab_size)
 
-    return X, y
+    return X, y, tokenizer
