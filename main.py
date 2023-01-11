@@ -2,6 +2,7 @@
 import os.path
 
 from ingestion import pdf2textlist, textlist2cleantext
+from models import build_model
 from tokenization import tokenize
 
 
@@ -12,7 +13,9 @@ def main():
     text_list = pdf2textlist(filenames)
     clean_text = textlist2cleantext(text_list)
     X, y, tokenizer, vocab_size = tokenize(clean_text, os.path.join(path, 'tokenizer.pkl'))
-    print(f'Hi')
+    model = build_model(vocab_size)
+
+    ...
 
 
 if __name__ == '__main__':
