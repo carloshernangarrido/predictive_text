@@ -1,20 +1,20 @@
 import pickle
-from typing import Tuple
+from typing import Tuple, List
 
 import numpy as np
 from keras.preprocessing.text import Tokenizer
 from keras.utils import to_categorical
 
 
-def tokenize(data: str, tokenizer_filename, ngram_size: int = 1) -> Tuple:
+def tokenize(data_list: List[str], tokenizer_filename, ngram_size: int = 1) -> Tuple:
     tokenizer = Tokenizer()
-    tokenizer.fit_on_texts([data])
+    tokenizer.fit_on_texts(data_list)
 
     # saving the tokenizer for predict function.
     with open(tokenizer_filename, 'wb') as file:
         pickle.dump(tokenizer, file)
 
-    sequence_data = tokenizer.texts_to_sequences([data])[0]
+    sequence_data = tokenizer.texts_to_sequences(data_list)[0]
     vocab_size = len(tokenizer.word_index) + 1
 
     sequences = []
