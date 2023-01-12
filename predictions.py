@@ -1,5 +1,6 @@
 # Importing the Libraries
 import numpy as np
+import msvcrt
 
 
 def predict_next_words(model, tokenizer, text_list, ngram_size: int = 2):
@@ -10,18 +11,16 @@ def predict_next_words(model, tokenizer, text_list, ngram_size: int = 2):
     """
     text_list = text_list[-ngram_size:]
     if len(text_list) < ngram_size:
-        return None
+        return []
     for word in text_list:
         if word not in tokenizer.word_index.keys():
-            return None
+            return []
     sequence = tokenizer.texts_to_sequences(text_list)
     sequence = np.array(sequence).reshape((-1, ngram_size))
 
     p = model.predict(sequence, verbose=0)[0]
     preds = p.argsort()[-5::][::-1]
     predicted_words = [tokenizer.index_word[pred] for pred in preds]
-
-    print(predicted_words)
     return predicted_words
 
 
@@ -34,18 +33,50 @@ def make_some_predictions(model, tokenizer, ngram_size):
         prediction can be made we just continue.
     """
 
+    print("Enter your line: ")
+    text_list = []
+    word = ''
+    last_space = False
+    predicted_words = ['']
     while True:
-        text = input("Enter your line: ")
+        if msvcrt.kbhit():
+            char = msvcrt.getche().decode(encoding='cp1252')
+            if char != ' ':
+                last_space = False
+                word += char
+            elif char == ' ' and last_space:
+                if len(predicted_words) != 0:
+                    text_list.append(predicted_words[0])
+                    print(predicted_words[0])
+                text_list.append(predicted_words[0])
+                predicted_words = predict_next_words(model, tokenizer, text_list, ngram_size)
+                if len(predicted_words) != 0:
+                    print(predicted_words)
+            else:
+                last_space = True
+                text_list.append(word)
+                word = ''
+                predicted_words = predict_next_words(model, tokenizer, text_list, ngram_size)
+                if len(predicted_words) != 0:
+                    print(predicted_words)
+                if text_list[-1] == 'q':
+                    print("Ending The Program.....")
+                    break
 
-        if text == "stop the script":
-            print("Ending The Program.....")
-            break
+    print(text_list)
 
-        else:
-            try:
-                text_list = text.split(" ")
-                while '' in text_list:
-                    text_list.remove('')
-                predict_next_words(model, tokenizer, text_list, ngram_size)
-            except KeyError:
-                continue
+    # while True:
+    #     text = input("Enter your line: ")
+    #
+    #     if text == "stop the script":
+    #         print("Ending The Program.....")
+    #         break
+    #     else:
+    #         try:
+    #             text_list = text.split(" ")
+    #             while '' in text_list:
+    #                 text_list.remove('')
+    #             predicted_words = predict_next_words(model, tokenizer, text_list, ngram_size)
+    #             print(predicted_words)
+    #         except KeyError:
+    #             continue
