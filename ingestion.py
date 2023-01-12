@@ -20,12 +20,6 @@ def textlist2cleantext(text_list: List[str]) -> List[str]:
             replace('ﬁ', 'fi')
         translator = str.maketrans(string.punctuation, ' ' * len(string.punctuation))  # map punctuation to space
         data = data.translate(translator)
-        # Avoid repeating word
-        # z = []
-        # for i in data.split():
-        #     if i not in z:
-        #         z.append(i)
-        # data = ' '.join(z)
         data = ' '.join([word for word in data.split(' ') if word.isalpha()])
         data_list.append(data)
     return data_list

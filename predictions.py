@@ -1,9 +1,13 @@
 # Importing the Libraries
 import numpy as np
-import msvcrt
+# import msvcrt
+from prompt_toolkit import prompt
+from prompt_toolkit.completion import Completion, Completer
+
+from ingestion import textlist2cleantext
 
 
-def predict_next_words(model, tokenizer, text_list, ngram_size: int = 2):
+def predict_next_words(model, tokenizer, text_list, ngram_size: int = 2, n_preds: int = 5):
     """
         In this function we are using the tokenizer and models trained
         and we are creating the sequence of the text entered and then
@@ -19,7 +23,7 @@ def predict_next_words(model, tokenizer, text_list, ngram_size: int = 2):
     sequence = np.array(sequence).reshape((-1, ngram_size))
 
     p = model.predict(sequence, verbose=0)[0]
-    preds = p.argsort()[-5::][::-1]
+    preds = p.argsort()[-n_preds::][::-1]
     predicted_words = [tokenizer.index_word[pred] for pred in preds]
     return predicted_words
 
@@ -32,51 +36,16 @@ def make_some_predictions(model, tokenizer, ngram_size):
         the prediction can be made on the text. If no
         prediction can be made we just continue.
     """
+    class MyCustomCompleter(Completer):
+        def get_completions(self, document, complete_event):
+            text_list = document.text.split(' ')
+            if len(text_list) > ngram_size + 1:
+                text_list = text_list[-(ngram_size + 1):]
+            text_list = [_.lower() for _ in textlist2cleantext(text_list)]
+            predicted_words = predict_next_words(model, tokenizer, text_list[:-1], ngram_size, n_preds=100)
+            predicted_words_filt = [_ for _ in predicted_words if _.startswith(text_list[-1])]
+            for predicted_word in predicted_words_filt:
+                yield Completion(predicted_word, start_position=-len(text_list[-1]))
+    text = prompt('> ', completer=MyCustomCompleter(), complete_in_thread=True, multiline=True)
+    print(f'You said: {text}')
 
-    print("Enter your line: ")
-    text_list = []
-    word = ''
-    last_space = False
-    predicted_words = ['']
-    while True:
-        if msvcrt.kbhit():
-            char = msvcrt.getche().decode(encoding='cp1252')
-            if char != ' ':
-                last_space = False
-                word += char
-            elif char == ' ' and last_space:
-                if len(predicted_words) != 0:
-                    text_list.append(predicted_words[0])
-                    print(predicted_words[0])
-                text_list.append(predicted_words[0])
-                predicted_words = predict_next_words(model, tokenizer, text_list, ngram_size)
-                if len(predicted_words) != 0:
-                    print(predicted_words)
-            else:
-                last_space = True
-                text_list.append(word)
-                word = ''
-                predicted_words = predict_next_words(model, tokenizer, text_list, ngram_size)
-                if len(predicted_words) != 0:
-                    print(predicted_words)
-                if text_list[-1] == 'q':
-                    print("Ending The Program.....")
-                    break
-
-    print(text_list)
-
-    # while True:
-    #     text = input("Enter your line: ")
-    #
-    #     if text == "stop the script":
-    #         print("Ending The Program.....")
-    #         break
-    #     else:
-    #         try:
-    #             text_list = text.split(" ")
-    #             while '' in text_list:
-    #                 text_list.remove('')
-    #             predicted_words = predict_next_words(model, tokenizer, text_list, ngram_size)
-    #             print(predicted_words)
-    #         except KeyError:
-    #             continue
