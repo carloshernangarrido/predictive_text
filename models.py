@@ -11,9 +11,9 @@ from keras.callbacks import TensorBoard
 def build_model(vocab_size: int, learning_rate: float = 0.001, ngram_size: int = 2) -> Sequential:
     model = Sequential()
     model.add(Embedding(vocab_size, 100, input_length=ngram_size))
-    model.add(LSTM(1000, return_sequences=True))
-    model.add(LSTM(1000))
-    # model.add(Dense(1000, activation="relu"))
+    model.add(LSTM(10, return_sequences=True))
+    model.add(LSTM(100))
+    model.add(Dense(100, activation="relu"))
     model.add(Dense(vocab_size, activation="softmax"))
     model.compile(loss="categorical_crossentropy", optimizer=Adam(learning_rate=learning_rate), metrics='accuracy')
     return model
