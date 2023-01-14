@@ -14,7 +14,9 @@ def tokenize(data_list: List[str], tokenizer_filename, ngram_size: int = 2) -> T
     with open(tokenizer_filename, 'wb') as file:
         pickle.dump(tokenizer, file)
 
-    sequence_data = tokenizer.texts_to_sequences(data_list)[0]
+    sequence_data = []
+    for seq in tokenizer.texts_to_sequences(data_list):
+        sequence_data += seq
     vocab_size = len(tokenizer.word_index) + 1
 
     sequences = []
@@ -29,8 +31,8 @@ def tokenize(data_list: List[str], tokenizer_filename, ngram_size: int = 2) -> T
         y_num.append(i[ngram_size])
     X = np.array(X)
     y_num = np.array(y_num)
-    # X_words = np.array([[tokenizer.index_word[x] for x in x_] for x_ in X])
-    # y_words = np.array([tokenizer.index_word[y_] for y_ in y_num])
+    X_words = np.array([[tokenizer.index_word[x] for x in x_] for x_ in X])
+    y_words = np.array([tokenizer.index_word[y_] for y_ in y_num])
     y = to_categorical(y_num, num_classes=vocab_size)
 
     return X, y, tokenizer, vocab_size
