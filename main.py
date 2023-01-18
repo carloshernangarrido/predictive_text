@@ -11,23 +11,26 @@ from console.prompter import make_some_predictions
 from tokenization import tokenize
 
 flags = {'build_and_fit': False,
-         'tokenize': False,
-         'load_previous_checkpoint': True}
+         'tokenize': False,  # ignored if 'build_and_fit'
+         'load_previous_checkpoint': False}
 
 
 def main():
     ngram_size = 3
+    min_length_of_pred = 4
     corpus_path = 'corpus/source_files'
     saved_models_path = 'saved_models'
     # filenames = ['Garrido et al. 2021.pdf', 'Garrido et al. 2018.pdf', '01 - El Gran Mago.docx']
     filenames = ['Libro_Blanco_Anatomia_Patologica_2019.pdf']
     filenames = [os.path.join(corpus_path, filename) for filename in filenames]
-    model_filename = os.path.join(saved_models_path, 'nextword1_libro_blanco.h5')
+    model_filename = os.path.join(saved_models_path, 'nextword1_libro_blanco_min4.h5')
 
     if flags['tokenize'] or flags['build_and_fit']:
         text_list = pdfdocx2textlist(filenames)
         clean_text = textlist2cleantext(text_list)
-        X, y, tokenizer, vocab_size = tokenize(clean_text, os.path.join(saved_models_path, 'tokenizer.pkl'), ngram_size)
+        X, y, tokenizer, vocab_size = \
+            tokenize(clean_text, os.path.join(saved_models_path, 'tokenizer.pkl'), ngram_size,
+                     min_length_of_pred=min_length_of_pred)
     else:
         with open(os.path.join(saved_models_path, 'tokenizer.pkl'), 'rb') as file:
             tokenizer = pickle.load(file)

@@ -2,7 +2,7 @@ from prompt_toolkit import prompt
 from prompt_toolkit.lexers import PygmentsLexer
 
 from pygments.lexer import RegexLexer
-from pygments.token import Name, Error
+from pygments.token import Name
 
 from console.prompt_custom_classes import MyCustomCompleter
 
@@ -16,14 +16,20 @@ def make_some_predictions(model, tokenizer, ngram_size):
         prediction can be made we just continue.
     """
 
+    vocabulary = list(tokenizer.word_index.keys())
+    with open("es.txt", "r", encoding="utf8") as f:
+        dictionary = f.read().splitlines()
+    dictionary = [entry.split('/')[0] + r'(s)?' if entry.endswith('/S') else entry for entry in dictionary]
+    dictionary = [entry.split('/')[0] + r'(es)?' if entry.endswith('/eS') else entry for entry in dictionary]
+
+    # vocabulary += dictionary
     class CustomDictionaryLexer(RegexLexer):
-        vocabulary = tokenizer.word_index.keys()
-        # with open("es.txt", "r") as f:
-        #     dictionary = f.readlines()
         name = "Dictionary"
         tokens = {
-            'root': [(r"\b(?i)" + word + r"\b", Name.Tag) for word in vocabulary] # + [(r"\b" + word + r"\b", Name.Label) for word in dictionary],
+            'root': [(r'(\b' + r'\b|\b(?i)'.join(vocabulary) + r'\b)', Name.Tag),
+                     (r'(\b' + r'\b|\b(?i)'.join(dictionary) + r'\b)', Name.Variable)]
         }
+        ...
 
     completer = MyCustomCompleter(ngram_size, model, tokenizer)
     lexer = PygmentsLexer(CustomDictionaryLexer)

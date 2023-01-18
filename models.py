@@ -29,5 +29,5 @@ def fit_model(model: Sequential, X: np.ndarray, y: np.ndarray, model_filename) -
 
     model.fit(X, y, epochs=50, batch_size=64, callbacks=[checkpoint, reduce, tensorboard_Visualization],
               validation_split=0.1,
-              workers=4, use_multiprocessing=True)
+              workers=8, use_multiprocessing=True)
     return model

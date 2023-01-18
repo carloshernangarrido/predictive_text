@@ -6,7 +6,7 @@ from keras.preprocessing.text import Tokenizer
 from keras.utils import to_categorical
 
 
-def tokenize(data_list: List[str], tokenizer_filename, ngram_size: int = 2) -> Tuple:
+def tokenize(data_list: List[str], tokenizer_filename, ngram_size: int = 2, min_length_of_pred: int = 1) -> Tuple:
     tokenizer = Tokenizer()
     tokenizer.fit_on_texts(data_list)
 
@@ -26,9 +26,10 @@ def tokenize(data_list: List[str], tokenizer_filename, ngram_size: int = 2) -> T
     sequences = np.array(sequences)
 
     X, y_num = [], []
-    for i in sequences:
-        X.append(i[0:ngram_size])
-        y_num.append(i[ngram_size])
+    for seq in sequences:
+        if len(tokenizer.index_word[seq[ngram_size]]) >= min_length_of_pred:
+            X.append(seq[0:ngram_size])
+            y_num.append(seq[ngram_size])
     X = np.array(X)
     y_num = np.array(y_num)
     X_words = np.array([[tokenizer.index_word[x] for x in x_] for x_ in X])
