@@ -4,6 +4,9 @@ import pickle
 import warnings
 
 from keras.models import load_model
+import tensorflowjs as tfjs
+import json
+
 
 from ingestion import pdfdocx2textlist, textlist2cleantext
 from models import build_model, fit_model
@@ -12,7 +15,8 @@ from tokenization import tokenize
 
 flags = {'build_and_fit': False,
          'tokenize': False,  # ignored if 'build_and_fit'
-         'load_previous_checkpoint': False}
+         'load_previous_checkpoint': False,
+         'save_js': True}
 
 
 def main():
@@ -20,10 +24,12 @@ def main():
     min_length_of_pred = 4
     corpus_path = 'corpus/source_files'
     saved_models_path = 'saved_models'
+    model_name = 'nextword1_libro_blanco_min4.h5'
     # filenames = ['Garrido et al. 2021.pdf', 'Garrido et al. 2018.pdf', '01 - El Gran Mago.docx']
     filenames = ['Libro_Blanco_Anatomia_Patologica_2019.pdf']
     filenames = [os.path.join(corpus_path, filename) for filename in filenames]
-    model_filename = os.path.join(saved_models_path, 'nextword1_libro_blanco_min4.h5')
+    model_filename = os.path.join(saved_models_path, model_name)
+    tfjs_target_dir = os.path.join(saved_models_path, 'js', model_name)
 
     if flags['tokenize'] or flags['build_and_fit']:
         text_list = pdfdocx2textlist(filenames)
@@ -48,6 +54,13 @@ def main():
             ngram_size = model.input.shape[1]
             warnings.warn(f'ngram_size was set to {ngram_size}')
     model.summary()
+
+    if flags['save_js']:
+        tfjs.converters.save_keras_model(model, tfjs_target_dir)
+        with open(os.path.join(tfjs_target_dir, 'tokenizer_word2index.json'), 'w') as file:
+            json.dump(tokenizer.word_index, file)
+        with open(os.path.join(tfjs_target_dir, 'tokenizer_index2word.json'), 'w') as file:
+            json.dump(tokenizer.index_word, file)
 
     make_some_predictions(model, tokenizer, ngram_size)
     ...

@@ -1,0 +1,11 @@
+.idea/
+Spanish.dic
+__pycache__/
+console/__pycache__/
+corpus/source_files/01 - El Gran Mago.docx
+corpus/source_files/Garrido et al. 2018.pdf
+corpus/source_files/Garrido et al. 2021.pdf
+corpus/source_files/Libro_Blanco_Anatomia_Patologica_2019.pdf
+corpus/source_files/tokenizer.pkl
+logsnextword1/
+saved_models/
