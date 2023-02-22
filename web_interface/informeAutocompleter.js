@@ -175,9 +175,9 @@ $( function() {
       },
       source: function( request, response ) { // delegate back to autocomplete, but extract the last term
         // let lastChar = request.term.substring(request.term.length - 1, request.term.length);
-        console.log('source!')
-        console.log("cursorPos: " + cursorPos)
-        console.log("cursorPosLast: " + cursorPosLast + "\n")
+        // console.log('source!');
+        // console.log("cursorPos: " + cursorPos);
+        // console.log("cursorPosLast: " + cursorPosLast + "\n");
 
         let lastChar = request.term.substring(cursorPos - 1, cursorPos);
         if (lastChar == ' ' || lastChar == '\n'){
@@ -209,9 +209,9 @@ $( function() {
         response( $.ui.autocomplete.filter_startWith( availableTags, matchingWord ) );
       },
       focus: function( event, ui ) { // replace with the focused suggestion
-        console.log('focus!')
-        console.log("cursorPos: " + cursorPos)
-        console.log("cursorPosLast: " + cursorPosLast + "\n")
+        // console.log('focus!');
+        // console.log("cursorPos: " + cursorPos);
+        // console.log("cursorPosLast: " + cursorPosLast + "\n");
 
         var lastIndex_s = this.value.substring(0, cursorPosLast).lastIndexOf(" ");
         var lastIndex_n = this.value.substring(0, cursorPosLast).lastIndexOf("\n");
