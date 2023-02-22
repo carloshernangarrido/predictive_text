@@ -124,21 +124,18 @@ $( function() {
     return val.replace(/^\s+|\s+$/g, '').split(/\s+/);
   }
   function extractLast( term ) {
+    term = term.replace(/[^\w\s'ÁÉÍÓÚáéíóú]/g, "").replace(/\s+/g, " ").toLowerCase();
     return split( term ).pop();
   }
   function extractLastWords( currentText ) {
+    currentText = currentText.replace(/[^\w\s'ÁÉÍÓÚáéíóú]/g, "").replace(/\s+/g, " ").toLowerCase();
     var afterWithout = currentText.substr(0, currentText.lastIndexOf(" "));
-    return split(afterWithout
-      .replace(/[^[A-Za-z0-9ÁÉÍÓÚáéíóú]\s\']|_/g, "")
-      .replace(/\s+/g, " ")
-      .toLowerCase())
-      .slice(-ngram_size);
+    let afterWithoutList = split(afterWithout).slice(-ngram_size);
+    return afterWithoutList;
   }
 
   function updateAvailableTags( currentText ) { // predicts next word on change
     var last_words = extractLastWords(currentText);
-    // console.log('*** current text:', currentText);
-    // console.log('*** current text:', last_words);
     var last_sequence = last_words.map(function(word) {
       word = word2index[word];
       return(word);
@@ -169,15 +166,11 @@ $( function() {
     })
     .autocomplete({
       minLength: 0,
-      delay: 100,
+      delay: 10,
       search: function( event, ui ){
         cursorPos = $(this).prop('selectionStart');
       },
       source: function( request, response ) { // delegate back to autocomplete, but extract the last term
-        // let lastChar = request.term.substring(request.term.length - 1, request.term.length);
-        // console.log('source!');
-        // console.log("cursorPos: " + cursorPos);
-        // console.log("cursorPosLast: " + cursorPosLast + "\n");
 
         let lastChar = request.term.substring(cursorPos - 1, cursorPos);
         if (lastChar == ' ' || lastChar == '\n'){
@@ -192,12 +185,9 @@ $( function() {
           var matcher = new RegExp("^" + $.ui.autocomplete.escapeRegex(matchingWord), "i");
 
           var completeList = $.grep(array, function (value) {
-            // return matcher.test(value.label || value.value || value);
             return matcher.test(value);
           });
           var shortenedList = completeList.slice(0, n_best_preds);
-          // console.log('complete', completeList);
-          // console.log('shortened', shortenedList);
           return shortenedList;
         };
         if (extractLast( request.term.substring(0, cursorPos) ) == extractLastWords( request.term.substring(0, cursorPos) ).slice(-1)[0]){
@@ -209,10 +199,6 @@ $( function() {
         response( $.ui.autocomplete.filter_startWith( availableTags, matchingWord ) );
       },
       focus: function( event, ui ) { // replace with the focused suggestion
-        // console.log('focus!');
-        // console.log("cursorPos: " + cursorPos);
-        // console.log("cursorPosLast: " + cursorPosLast + "\n");
-
         var lastIndex_s = this.value.substring(0, cursorPosLast).lastIndexOf(" ");
         var lastIndex_n = this.value.substring(0, cursorPosLast).lastIndexOf("\n");
         if (lastIndex_s > lastIndex_n){ // period space
