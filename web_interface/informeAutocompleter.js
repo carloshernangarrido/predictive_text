@@ -156,6 +156,9 @@ $( function() {
     }    
   }
 
+  var cursorPos;
+  var cursorPosLast;
+  var endingText, startingText;
   $( "#tags_contenido" )
     // don't navigate away from the field on tab when selecting an item
     .on( "keydown", function( event ) {
@@ -166,11 +169,22 @@ $( function() {
     })
     .autocomplete({
       minLength: 0,
+      delay: 100,
+      search: function( event, ui ){
+        cursorPos = $(this).prop('selectionStart');
+      },
       source: function( request, response ) { // delegate back to autocomplete, but extract the last term
-        
-        let lastChar = request.term.substring(request.term.length - 1, request.term.length);
-        if (lastChar == ' '){
-          updateAvailableTags(request.term)
+        // let lastChar = request.term.substring(request.term.length - 1, request.term.length);
+        console.log('source!')
+        console.log("cursorPos: " + cursorPos)
+        console.log("cursorPosLast: " + cursorPosLast + "\n")
+
+        let lastChar = request.term.substring(cursorPos - 1, cursorPos);
+        if (lastChar == ' ' || lastChar == '\n'){
+          cursorPosLast = cursorPos;
+          startingText = request.term.substring(0, cursorPosLast);
+          endingText = request.term.substring(cursorPosLast);
+          updateAvailableTags(startingText);
         }
 
         // Overrides the default autocomplete filter function to search only from the beginning of the string
@@ -186,30 +200,37 @@ $( function() {
           // console.log('shortened', shortenedList);
           return shortenedList;
         };
-        if (extractLast( request.term ) == extractLastWords( request.term ).slice(-1)[0]){
+        if (extractLast( request.term.substring(0, cursorPos) ) == extractLastWords( request.term.substring(0, cursorPos) ).slice(-1)[0]){
           var matchingWord = "";
         }
         else{
-          var matchingWord = extractLast( request.term );
+          var matchingWord = extractLast( request.term.substring(0, cursorPos) );
         };
         response( $.ui.autocomplete.filter_startWith( availableTags, matchingWord ) );
       },
       focus: function( event, ui ) { // replace with the focused suggestion
-        var lastIndex_s = this.value.lastIndexOf(" ");
-        var lastIndex_n = this.value.lastIndexOf("\n");
-        if (lastIndex_s > lastIndex_n){
+        console.log('focus!')
+        console.log("cursorPos: " + cursorPos)
+        console.log("cursorPosLast: " + cursorPosLast + "\n")
+
+        var lastIndex_s = this.value.substring(0, cursorPosLast).lastIndexOf(" ");
+        var lastIndex_n = this.value.substring(0, cursorPosLast).lastIndexOf("\n");
+        if (lastIndex_s > lastIndex_n){ // period space
           if(this.value[lastIndex_s-1] == "."){
-            this.value = this.value.substring(0, lastIndex_s + 1) 
-            + (ui.item.value.substring(0, 1)).toUpperCase() + ui.item.value.substring(1);
+            this.value = startingText + (ui.item.value.substring(0, 1)).toUpperCase() + ui.item.value.substring(1) + endingText;
+            this.selectionStart = (startingText + ui.item.value).length;
+            this.selectionEnd = this.selectionStart;
           }
-          else{
-            this.value = this.value.substring(0, lastIndex_s + 1) 
-            + ui.item.value.substring(0);
+          else{ // space
+            this.value = startingText + ui.item.value + endingText;
+            this.selectionStart = (startingText + ui.item.value).length;
+            this.selectionEnd = this.selectionStart;
           }
         }
-        else{
-          this.value = this.value.substring(0, lastIndex_n + 1) 
-            + (ui.item.value.substring(0, 1)).toUpperCase() + ui.item.value.substring(1);
+        else{ // full stop
+          this.value = startingText + (ui.item.value.substring(0, 1)).toUpperCase() + ui.item.value.substring(1) + endingText;
+          this.selectionStart = (startingText + ui.item.value).length;
+          this.selectionEnd = this.selectionStart;
         };
         return false;
       },
