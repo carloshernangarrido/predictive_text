@@ -131,8 +131,8 @@ $( function() {
     currentText = currentText.replace(/[^\w\s'ÁÉÍÓÚáéíóú]/g, "").replace(/\s+/g, " ").toLowerCase();
     var afterWithout = currentText.substr(0, currentText.lastIndexOf(" "));
     let afterWithoutList = split(afterWithout).slice(-ngram_size);
-    console.log(afterWithout);
-    console.log(afterWithoutList);
+    // console.log(afterWithout);
+    // console.log(afterWithoutList);
     return afterWithoutList;
   }
 
@@ -198,7 +198,7 @@ $( function() {
         else{
           var matchingWord = extractLast( request.term.substring(0, cursorPos) );
         };
-        console.log(matchingWord)
+        // console.log(matchingWord);
         response( $.ui.autocomplete.filter_startWith( availableTags, matchingWord ) );
       },
       focus: function( event, ui ) { // replace with the focused suggestion
